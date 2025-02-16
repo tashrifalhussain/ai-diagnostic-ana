@@ -1,0 +1,78 @@
+<html>
+<head>
+    <title>AI Diagnostic Report in Bangla</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.3/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-edf2f4 text-2b2d42">
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4 text-center text-2b2d42">AI Diagnostic Report Analyzer</h1>
+        <form id="reportForm" class="bg-white p-4 rounded shadow-md border border-8d99ae">
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2 text-2b2d42">Upload Report Image</label>
+                <input type="file" id="reportImage" accept="image/*" class="w-full p-2 border border-8d99ae rounded">
+            </div>
+            <button type="submit" class="w-full bg-2b2d42 hover:bg-8d99ae text-white font-bold py-2 px-4 rounded">
+                Analyze & Amaze!
+            </button>
+        </form>
+
+        <div id="outputSection" class="mt-6 p-4 bg-white rounded shadow-md">
+            <h2 class="text-xl font-bold mb-2 text-2b2d42">Generated Report</h2>
+            <div id="output" class="text-sm text-2b2d42"></div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-8">
+        <a href="https://example.com" class="text-2b2d42">Made with ❤️</a>
+    </footer>
+
+    <script>
+        document.getElementById('reportForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const fileInput = document.getElementById('reportImage');
+            if (fileInput.files.length === 0) {
+                alert("Please upload an image.");
+                return;
+            }
+
+            const output = document.getElementById('output');
+            output.innerText = ""; // Clear previous output
+
+            const prompt = "Generate a diagnostic report in Bangla language based on the uploaded image that includes analysis and findings.";
+
+            const ws = new WebSocket('wss://backend.buildpicoapps.com/ask_ai_streaming_v2');
+            ws.addEventListener("open", () => {
+                ws.send(JSON.stringify({
+                    appId: "commercial-large",
+                    prompt: prompt,
+                }));
+            });
+
+            ws.addEventListener("message", (event) => {
+                console.log(event.data);
+                output.innerText = `${output.innerText}${event.data}`;
+            });
+
+            ws.addEventListener("close", (event) => {
+                console.log("Connection closed", event.code, event.reason);
+                if (event.code != 1000) {
+                    alert("Oops, we ran into an error. Refresh the page and try again.");
+                }
+            });
+
+            ws.addEventListener("error", (error) => {
+                console.log('WebSocket error', error);
+                alert("Oops, we ran into an error. Refresh the page and try again.");
+            });
+        });
+    </script>
+</body>
+</html>
